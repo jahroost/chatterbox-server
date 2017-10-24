@@ -60,17 +60,19 @@ var requestHandler = function(request, response) {
       console.log(' this is the chunk we push to results ~~~~~~~~~~~: ', chunk);
       body += chunk;
     });
-
     request.on('end', function() {
       //TODO add to results && end response
       response.end(JSON.stringify({results}));
       console.log('this is the completed message: ', body);
     });
+    results.push(body);
   } else {
-    response.writeHead(404, headers);
+    // response.writeHead(404);
+    response.end(JSON.stringify({results}));
     // response.writeHead(404, {'Content-Type': 'application/json'});
     // response.write(JSON.stringify({error: "Method not allowed"}, 0, 4));
   }
+  return results;
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
 
@@ -81,6 +83,7 @@ var requestHandler = function(request, response) {
   //
   // Calling .end "flushes" the response's internal buffer, forcing
   // node to actually send all the data over to the client.
+
 };
 
 // These headers will allow Cross-Origin Resource Sharing (CORS).
