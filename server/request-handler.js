@@ -22,56 +22,42 @@ var defaultCorsHeaders = {
 var results = [];
 
 var requestHandler = function(request, response) {
-  // Request and Response come from node's http module.
-  //
-  // They include information about both the incoming request, such as
-  // headers and URL, and about the outgoing response, such as its status
-  // and content.
-  //
-  // Documentation for both request and response can be found in the HTTP section at
-  // http://nodejs.org/documentation/api/
-
-  // Do some basic logging.
-  //
-  // Adding more logging to your server can be an easy way to get passive
-  // debugging help, but you should always be careful about leaving stray
-  // console.logs in your code.
   console.log('Serving request type ' + request.method + ' for url ' + request.url);
-
-  // The outgoing status.
-  var statusCode = 200;
-
-
-  // See the note below about CORS headers.
   var headers = defaultCorsHeaders;
 
-  // Tell the client we are sending them plain text.
-  //
-  // You will need to change this if you are sending something
-  // other than plain text, like JSON or HTML.
-  headers['Content-Type'] = 'application/JSON';
 
+  if (request.method === 'POST' && request.url === '/classes/messages') {
 
-  if (request.method === 'POST') {
-
+    headers['Content-Type'] = 'text/plain';
     var body = '';
-
+    response.writeHead(201, headers);
     request.on('data', function(chunk) {
       console.log(' this is the chunk we push to results ~~~~~~~~~~~: ', chunk);
       body += chunk;
     });
     request.on('end', function() {
       //TODO add to results && end response
+      results.push(JSON.parse(body));
       response.end(JSON.stringify({results}));
       console.log('this is the completed message: ', body);
     });
-    results.push(body);
+  } else if (request.method === 'GET' && request.url === '/classes/messages') {
+    headers['Content-Type'] = 'application/JSON';
+    response.writeHead(200, headers);
+    request.on('end', function() {
+      //TODO add to results && end response
+
+      response.end(JSON.stringify({results}));
+      console.log('this is the completed message: ', body);
+    });
   } else {
-    // response.writeHead(404);
-    response.end(JSON.stringify({results}));
-    // response.writeHead(404, {'Content-Type': 'application/json'});
-    // response.write(JSON.stringify({error: "Method not allowed"}, 0, 4));
+    headers['Content-Type'] = 'text/plain';
+    response.writeHead(404, headers)
+    response.end('404 Error');
   }
+
+
+
   return results;
   // .writeHead() writes to the request line and headers of the response,
   // which includes the status and all headers.
